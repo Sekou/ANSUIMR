@@ -11,3 +11,6 @@ with open("log.txt", "r") as f:
         arr.append(tokens)
 
 print(arr)
+
+
+#TODO: i=argmax(Q:=1/(L+20*N))
