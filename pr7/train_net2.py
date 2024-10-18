@@ -39,7 +39,7 @@ def trainNet():
     losses = model.fit(X_train, Y_train,
                        validation_data=(X_val, Y_val),
                        batch_size=1,
-                       epochs=100 )
+                       epochs=100)
 
     for x, y in zip(X_val[:5], Y_val[:5]):
         result = model.predict([x.tolist()])

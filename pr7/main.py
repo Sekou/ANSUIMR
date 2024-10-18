@@ -3,8 +3,6 @@ import numpy as np
 import math
 from robot import Robot, limAng
 
-
-
 pygame.font.init()
 font = pygame.font.SysFont('Comic Sans MS', 20)
 def drawText(screen, s, x, y):
