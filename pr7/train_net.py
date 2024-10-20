@@ -30,5 +30,5 @@ def trainNet():
     result=model.predict([[0.4, 0.4, 0.4]])
     print(result)
 
-def main():
+if __name__=="__main__":
     trainNet()

@@ -13,12 +13,13 @@ sz = (800, 600)
 
 def main():
     samples = []
+    samplesDebug = []
 
     screen = pygame.display.set_mode(sz)
     timer = pygame.time.Clock()
     fps = 20
 
-    robot = Robot(100, 100, 1)
+    robot = Robot(200, 200, 1)
 
     time = 0
     iFrame=0
@@ -31,18 +32,14 @@ def main():
         dt = 1 / fps
         screen.fill((255, 255, 255))
 
-        dx=goal[0] - robot.x
-        dy=goal[1] - robot.y
-        da=limAng(math.atan2(dy, dx) - robot.alpha)
-
         robot.goto(goal, dt)
-        theta=robot.steerVelocity
 
         robot.sim(dt)
         robot.draw(screen)
 
         if iFrame%(fps//4)==0:
-            sample = [dx, dy, da, theta]
+            sample = [int(robot.x), int(robot.y), int(goal[0]),
+                      int(goal[1]), round(robot.alpha,3), round(robot.steerVelocity, 3)]
             samples.append(sample)
             goal=[np.random.randint(0, sz[0]),
                 np.random.randint(0, sz[1])]

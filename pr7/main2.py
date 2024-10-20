@@ -24,7 +24,7 @@ def main():
     goal = [300, 400]
 
     net=createModel()
-    net.load_weights("net.h5")
+    net.load_weights("net.weights.h5")
 
     while True:
         for ev in pygame.event.get():
@@ -33,12 +33,8 @@ def main():
         dt = 1 / fps
         screen.fill((255, 255, 255))
 
-        dx=goal[0] - robot.x
-        dy=goal[1] - robot.y
-        da=limAng(math.atan2(dy, dx) - robot.alpha)
-
-        input=[dx/100, dy/100, da]
-        output=net.predict([input])
+        input=[robot.x/100, robot.y/100, goal[0]/100, goal[1]/100, robot.alpha]
+        output=net.predict(np.array([input]))
         robot.steerVelocity=output[0][0]
         robot.speed=50
 
