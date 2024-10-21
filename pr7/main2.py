@@ -57,7 +57,6 @@ def main():
         time += dt
         iFrame+=1
 
-
 main()
 
 # template file by S. Diane, RTU MIREA, 2024

@@ -13,7 +13,6 @@ sz = (800, 600)
 
 def main():
     samples = []
-    samplesDebug = []
 
     screen = pygame.display.set_mode(sz)
     timer = pygame.time.Clock()
@@ -30,14 +29,22 @@ def main():
             if ev.type == pygame.QUIT:
                 sys.exit(0)
         dt = 1 / fps
-        screen.fill((255, 255, 255))
 
         robot.goto(goal, dt)
-
         robot.sim(dt)
-        robot.draw(screen)
 
-        if iFrame%(fps//4)==0:
+        screen.fill((255, 255, 255))
+        robot.draw(screen)
+        pygame.draw.circle(screen, (255, 0, 0), goal, 5, 2)
+        drawText(screen, f"Time = {time:.3f}", 5, 5)
+        drawText(screen, f"Num Samples = {len(samples)}", 5, 25)
+
+        pygame.display.flip()
+        timer.tick(fps)
+        time += dt
+        iFrame+=1
+
+        if iFrame%(fps//4)==0: #4 раза в секунду
             sample = [int(robot.x), int(robot.y), int(goal[0]),
                       int(goal[1]), round(robot.alpha,3), round(robot.steerVelocity, 3)]
             samples.append(sample)
@@ -50,16 +57,6 @@ def main():
                     f.write(str(robot.traj))
                 pygame.image.save(screen, "simulation.png")
                 sys.exit(0)
-
-        pygame.draw.circle(screen, (255, 0, 0), goal, 5, 2)
-
-        drawText(screen, f"Time = {time:.3f}", 5, 5)
-        drawText(screen, f"Num Samples = {len(samples)}", 5, 25)
-
-        pygame.display.flip()
-        timer.tick(fps)
-        time += dt
-        iFrame+=1
 
 
 main()
