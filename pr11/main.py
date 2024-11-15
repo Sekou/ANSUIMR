@@ -3,7 +3,6 @@ import sys, pygame
 import numpy as np
 import math
 
-
 fps = 20
 GRASS_REGROWTH_TIME=60/fps
 
