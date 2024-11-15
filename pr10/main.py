@@ -60,6 +60,7 @@ class Graph:
                 p=nodePoints[i]
                 node=Node(*p)
                 row.append(node)
+                i += 1
             self.nodes.append(row)
     def connect(self):
         neighborhood=[[0, -1], [1, 0], [0, 1], [-1, 0]]
