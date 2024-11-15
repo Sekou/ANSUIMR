@@ -171,5 +171,4 @@ def main():
         timer.tick(fps)
 
 main()
-
 #template file by S. Diane, RTU MIREA, 2024
