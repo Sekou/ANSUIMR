@@ -5,7 +5,7 @@ import math
 
 
 fps = 20
-GRASS_REGROWTH_TIME=30/fps
+GRASS_REGROWTH_TIME=60/fps
 
 pygame.font.init()
 def drawText(screen, s, x, y, sz=20, color=(0,0,0)): #отрисовка текста
@@ -49,25 +49,29 @@ sz = (800, 600)
 class Cell:
     def __init__(self, x, y, sz):
         self.x, self.y, self.sz =x, y, sz
-        self.color=(255, 255, 255)
         self.countdown=0
+        self.hasGrass=False
     def getPos(self):
         return [self.x, self.y]
     def draw(self, screen):
         pose=[self.x-self.sz/2, self.y-self.sz/2, self.sz,self.sz]
-        pygame.draw.rect(screen, self.color, pose, 0)
+        color=(0,255,0) if self.hasGrass else (255,255,255)
+        pygame.draw.rect(screen, color, pose, 0)
         pygame.draw.rect(screen, (0,0,0), pose, 2)
     def sim(self, dt):
         if self.countdown>GRASS_REGROWTH_TIME:
-            self.color=(0,255,0)
+            self.hasGrass=True
         else:
-            self.color=(255,255,255)
             self.countdown += dt
+            self.hasGrass=False
 
 class Agent:
     def __init__(self, x, y, type, sz):
         self.x, self.y, self.type, self.sz = x, y, type, sz
         self.color = (255, 255, 255) if type=="sheep" else (0,0,0)
+        self.targetPos=None
+        self.targetCell=None
+        self.targetAgent=None
     def getPos(self):
         return [self.x, self.y]
     def draw(self, screen):
@@ -81,6 +85,27 @@ class Agent:
             p1 = [x - sz / 2 + i * sz / 3, y]
             p2 = [x - sz / 2 + i * sz / 3, y + sz / 2]
             pygame.draw.line(screen, (0, 0, 0), p1, p2, 2)
+    def getNearestGrass(self, cells):
+        cc=[c for c in cells if c.hasGrass]
+        dd=[dist(self.getPos(), c.getPos()) for c in cc]
+        if len(dd)>0:
+            return cc[np.argmin(dd)]
+        else:
+            return None
+    def sim(self, dt, cells):
+        if self.targetCell is None:
+            self.targetCell=self.getNearestGrass(cells)
+        if self.targetCell is not None:
+            self.targetPos=self.targetCell.getPos()
+            v=np.subtract(self.targetPos, self.getPos())
+            v=50*v/np.linalg.norm(v)*dt
+            self.x+=v[0]
+            self.y+=v[1]
+            d=dist(self.getPos(), self.targetPos)
+            if d < self.sz:
+                self.targetCell.hasGrass=False
+                self.targetCell.countdown=0
+                self.targetCell=None
 
 class Grid:
     def __init__(self, x0, y0, sz, nx, ny):
@@ -130,6 +155,9 @@ def main():
         dt=1/fps
 
         grid.sim(dt)
+
+        for a in agents:
+            a.sim(dt, grid.getAllCells())
 
         screen.fill((255, 255, 255))
         grid.draw(screen)
