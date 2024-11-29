@@ -43,10 +43,11 @@ class LunarModule:
         self.pts = [[0, -25], [15, -15], [25, 18], [25, 25], [17, 25], [17, 18], [10, 18], [10, 25], [3, 25], [3, 18], [-3, 18], [-3, 25], [-10, 25], [-10, 18], [-17, 18], [-17, 25], [-25, 25], [-25, 18], [-15, -15]]
         self.x, self.y, self.ang=x, y, ang
         self.m=1
+        self.J=50
         self.vx=0
         self.vy=0
         self.collision=False
-        self.thrust=0
+        self.gas=[0,0,0,0]
         self.wang=0
     def getPos(self):
         return [self.x, self.y]
@@ -57,11 +58,28 @@ class LunarModule:
     def sim(self, dt):
         if self.collision:
             return
-        gLunar=1.625
-        F=self.m*gLunar
-        a=F/self.m
-        self.vy+=a*dt
-        self.y+=self.vy*dt
+        gLunar=5
+        Fy=self.m*gLunar
+        Fx=0
+
+        if self.gas is not None:
+            ff=10*np.array(self.gas, dtype=float)
+            force=np.sum(ff)
+            vecForce=force*np.array(rot([0, -1], self.ang))
+            Fx+=vecForce[0]
+            Fy+=vecForce[1]
+
+            torque=np.dot(ff, [-17, -10, 10, 17])
+            eps=torque/self.J
+            self.wang+=eps*dt
+            self.ang+=self.wang*dt
+
+        ax = Fx / self.m
+        ay = Fy / self.m
+        self.vx += ax * dt
+        self.vy += ay * dt
+        self.x += self.vx * dt
+        self.y += self.vy * dt
 
     def checkCollision(self, terrain):
         pts=rotArr(self.pts, self.ang)+np.array(self.getPos())
@@ -111,13 +129,19 @@ def main():
             if ev.type==pygame.QUIT:
                 sys.exit(0)
             if ev.type == pygame.KEYDOWN:
-                if ev.key == pygame.K_r:
-                    print("Hi")
+                if ev.key == pygame.K_w:
+                    lm.gas=[0.5, 0.5, 0.5, 0.5]
+                if ev.key == pygame.K_d:
+                    lm.gas=[0, 0, 0.1, 0.1]
+                if ev.key == pygame.K_a:
+                    lm.gas=[0.1, 0.1, 0, 0]
 
         dt=1/fps
 
         lm.sim(dt)
         lm.checkCollision(terrain)
+
+        lm.gas=0.9*np.array(lm.gas)
 
         screen.fill((255, 255, 255))
         terrain.draw(screen)
