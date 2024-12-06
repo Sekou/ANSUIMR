@@ -54,9 +54,13 @@ class Edge:
         self.n1=n1
         self.n2=n2
         self.w=w
+        self.pheromone=0
     def draw(self, screen):
-        pygame.draw.line(screen, (0,0,255), self.n1.getPos(), self.n2.getPos())
-
+        k=1-max(0.1,self.pheromone/100)
+        R,G,B=int(255*k),int(255*k),255
+        pygame.draw.line(screen, (R,G,B), self.n1.getPos(), self.n2.getPos())
+    def incrementPheromone(self, val):
+        self.pheromone=min(100, self.pheromone+val)
 class Node:
     def __init__(self, x, y):
         self.x, self.y=x, y
@@ -81,6 +85,21 @@ class Graph:
                 w=dist(n1.getPos(), n2.getPos())
                 n1.nextEdges.append(Edge(n1, n2, w))
 
+class Ant:
+    def __init__(self, node):
+        self.currentNode=node
+    def draw(self, screen):
+        pygame.draw.circle(screen, (255,0,0), self.currentNode.getPos(), 5, 2)
+    def move(self):
+        ind=np.random.randint(len(self.currentNode.nextEdges))
+        self.currentNode=self.currentNode.nextEdges[ind].n2
+        self.currentNode.nextEdges[ind].incrementPheromone(5)
+
+#TODO: оставлять феромон обр.пропорц длине перехода,
+# выбирать переходы с макс. феромоном,
+# не ходить повторно в те же вершины
+# завершать движение при посещении всех вершин
+
 def main():
     screen = pygame.display.set_mode(sz)
     timer = pygame.time.Clock()
@@ -89,19 +108,23 @@ def main():
     graph=Graph(pts)
     graph.connect()
 
+    ant=Ant(graph.nodes[0])
+
     while True:
         for ev in pygame.event.get():
             if ev.type==pygame.QUIT:
                 sys.exit(0)
             if ev.type == pygame.KEYDOWN:
-                if ev.key == pygame.K_r:
-                    print("Hi")
+                if ev.key == pygame.K_1:
+                    ant.move()
 
         dt=1/fps
 
         screen.fill((255, 255, 255))
 
         graph.draw(screen)
+        ant.draw(screen)
+        ant.move()
 
         drawText(screen, f"Test = {1}", 5, 5)
 
