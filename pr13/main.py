@@ -24,12 +24,10 @@ def dist(p1, p2): #расстояние между точками
     return np.linalg.norm(np.subtract(p1, p2))
 
 def probSel(probs):
-    m, s=sum(probs), 0
+    m, s, r=sum(probs), 0, np.random.rand()
     if m==0: return np.random.randint(len(probs))
-    probs=[p/m for p in probs]
-    r=np.random.rand()
     for i in range(len(probs)):
-        s+=probs[i]
+        s+=probs[i]/m
         if s>=r: return i
     return -1
 
@@ -71,6 +69,7 @@ class Edge:
         pygame.draw.line(screen, (R,G,B), self.n1.getPos(), self.n2.getPos())
     def incrementPheromone(self, val):
         self.pheromone=min(100, self.pheromone+val)
+
 class Node:
     def __init__(self, x, y):
         self.x, self.y=x, y
@@ -127,12 +126,12 @@ class Ant:
             return True
         return False
 
-
 #TODO:
 # +оставлять феромон обр.пропорц длине перехода,
 # +выбирать переходы с макс. феромоном,
 # +не ходить повторно в те же вершины
 # +завершать движение при посещении всех вершин
+# +испарять феромон
 
 def main():
     screen = pygame.display.set_mode(sz)
